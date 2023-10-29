@@ -1,0 +1,40 @@
+const Demande=require("../models/Demande.model")
+module.exports.createData=(req,res)=>{
+Demande.create(req.body)
+.then(
+    myDemande=>{
+        console.log(myDemande)
+        res.status(200).json({myDemande})
+    }
+)
+.catch(err=>{res.status(404).json(err)})
+}
+module.exports.updateData=(req,res)=>{
+    Demande.findByIdAndUpdate({_id:req.params.id},req.body)
+    .then(newupdate=>{
+        res.status(200).json(newupdate)
+    })
+    .catch(err=>{res.status(404).json(err)})
+}
+module.exports.findAllData=(req,res)=>{
+    Demande.find()
+.then(allDemande=>{
+    res.status(200).json(allDemande)
+})
+.catch(err=>{res.status(404).json(err)})
+}
+module.exports.findData=(req,res)=>{
+    Demande.findOne({_id:req.params.id})
+    .then(myDemande=>{
+        res.status(200).json(myDemande)
+    })
+    .catch(err=>{res.status(404).json(err)})
+ }
+ module.exports.deletData=(req,res)=>{
+    Demande.findByIdAndDelete({_id:req.params.id})
+    .then(delDemande=>{
+        res.status(200).json(delDemande)
+    })
+    .catch(err=>{res.status(404).json(err)})
+    }
+ 
