@@ -1,100 +1,130 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import './Validation.css';
 
 const Validation = () => {
   const [data, setData] = useState([]);
   const { id } = useParams();
   const [post, setPost] = useState('');
-  const [filteredDataID, setFilteredDataID] = useState("");
   const [errors, setErrors] = useState([]);
+  const [demandes, setDemandes] = useState([]);
   const nav = useNavigate();
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/Data`).then((res) => {
-      setData(res.data);
-    }).catch((err) => {
-      console.log(err);
-    });
+    const fetchData = async () => {
+      try {
+        const [demandeRes, dataRes] = await Promise.all([
+          axios.get('http://localhost:5000/Demande'),
+          axios.get('http://localhost:5000/Data')
+        ]);
 
-    axios.get(`http://localhost:5000/Data/${id}`).then((res) => {
-      setPost(res.data.post);
-    }).catch((err) => {
-      console.log(err);
-    });
+        const demandesData = demandeRes.data;
+        const employeesData = dataRes.data;
+
+        setDemandes(demandesData);
+
+        const filteredEmployees = employeesData.filter(employee =>
+          demandesData.some(demande => demande.ID === employee._id)
+        );
+
+        setData(filteredEmployees);
+
+        const userRes = await axios.get(`http://localhost:5000/Data/${id}`);
+        setPost(userRes.data.post);
+      } catch (err) {
+        setErrors([err.message || 'An error occurred']);
+      }
+    };
+    fetchData();
   }, [id]);
 
-  const handleButtonClick = (index) => {
-    if (post.toUpperCase() === 'RH') {
-      const newData = [...data];
-      newData[index].valid = !newData[index].valid;
-      setData(newData);
+  const handleButtonClick = async (index) => {
+    if (post.toUpperCase() === "RH") {
+      const currentEmployee = data[index];
+      const currentDemande = demandes.find(demande => demande.ID === currentEmployee._id);
 
-      const sendObj = {
-        name: newData[index].name,
-        Email: newData[index].Email,
-        post: newData[index].post,
-        Passe: newData[index].Passe,
-        valid: newData[index].valid,
-      };
+      if (!currentDemande) {
+        setErrors(['Demande not found']);
+        return;
+      }
 
-      axios.put(`http://localhost:5000/Data/${newData[index]._id}`, sendObj)
-        .then(() => {
-          console.log(data);
-        })
-        .catch(err=>{
-          const errorResponse = err.response.data.errors; 
-          console.log(errorResponse)
-          const errorArr = []; 
-          for (const key of Object.keys(errorResponse)) { 
-              errorArr.push(errorResponse[key].message)
-          }
-          setErrors(errorArr);
-      })
+      const updatedSolde = currentDemande.solde - currentDemande.Numero;
+
+      if (updatedSolde < 0) {
+        setErrors(['Insufficient leave balance']);
+        return;
+      }
+
+      try {
+        const sendObj = {
+          ...currentDemande,
+          solde: updatedSolde,
+        };
+        const newEmployee = {
+          ...currentEmployee,
+          valid: true,
+        };
+
+        await axios.put(`http://localhost:5000/Demande/${currentDemande._id}`, sendObj);
+        await axios.put(`http://localhost:5000/Data/${currentEmployee._id}`, newEmployee);
+
+        setData(prevData => {
+          const newData = [...prevData];
+          newData[index] = { ...newData[index], valid: true };
+          return newData;
+        });
+      } catch (err) {
+        const errorResponse = err.response?.data?.errors || {};
+        const errorArr = Object.values(errorResponse).map(e => e.message);
+        setErrors(errorArr);
+      }
     }
   };
 
-  const Demande = (index) => {
-    axios.get('http://localhost:5000/demande')
-      .then((res) => {
-        console.log(res.data)
-        if (post.toUpperCase() === 'RH'){
-        const filtered = res.data.filter((item) => {
-          return item.ID === data[index]._id
-        });
-        console.log(filtered)
-        if (filtered.length > 0) {
-          const newID= filtered[0].ID
-          console.log(newID)
-          nav(`/SeeDemande/${newID}`);
-        }
-  }})
-      .catch((err) => {
-        console.log(err);
-      });
+  const handleDemandeClick = (index) => {
+    if (post.toUpperCase() === "RH") {
+      const employeeId = data[index]._id;
+      nav(`/SeeDemande/${employeeId}`);
+    }
   };
 
   return (
-    <div>
-      {errors.map((err, index) => <p key={index}>{err}</p>)}
-      <Link to="/">Accueil</Link>
-      <table>
+    <div className="validation-container">
+      {errors.length > 0 && (
+        errors.map((err, index) => <p key={index} className="error-message">{err}</p>)
+      )}
+
+      <Link to="/" className="validation-link">Accueil</Link>
+
+      <table className="validation-table">
         <thead>
           <tr>
-            <th>Nom de salarié:</th>
+            <th>Nom</th>
+            <th>Post</th>
+            <th>Solde de Congé</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={index}>
               <td>{item.name}</td>
+              <td>{item.post}</td>
+              <td>{demandes.find(demande => demande.ID === item._id)?.solde || 0}</td>
               <td>
-                <button onClick={() => handleButtonClick(index)}>
-                  {item.valid ? 'Validé' : 'Non Validé'}
+                <button 
+                  className="validation-button" 
+                  onClick={() => handleButtonClick(index)}
+                >
+                  {(item.valid) ? 'Valide' : 'Invalide'} 
                 </button>
-              </td>
-              <td>
-                <button onClick={() => Demande(index)}>Voir Demande</button>
+                <button 
+                  className="validation-button" 
+                  onClick={() => handleDemandeClick(index)}
+                >
+                  Voir Demande
+                </button>
               </td>
             </tr>
           ))}

@@ -4,5 +4,5 @@ module.exports =(app) =>{
     app.get("/Data/:id", Datacontrollers.findData)
     app.post("/Data", Datacontrollers.createData)
     app.put("/Data/:id",Datacontrollers.updateData)
-    app.delete("/Data/:id",Datacontrollers.deletData)
+    app.delete("/Data/:id",Datacontrollers.deleteData)
 } 

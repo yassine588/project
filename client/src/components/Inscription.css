@@ -1,0 +1,50 @@
+.inscription-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('../Assets/inscrit.jpeg') no-repeat center center;
+    background-size: cover;
+}
+
+.inscription-form {
+    padding: 60px;
+    background-color: rgba(24, 63, 180, 0.5); 
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    width: 300px;
+}
+
+.inscription-header {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    color: #222121;
+}
+
+.inscription-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+.inscription-input::placeholder {
+    color: rgb(174, 27, 63);
+}
+
+.inscription-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.inscription-button:hover {
+    background-color: #0056b3;
+}

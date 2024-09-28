@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import Inscription from './Inscription'
+import './Accueil.css';
 const Accueil = () => {
  const [Login,SetLogin]=useState("")
  const  [MotDePasse,SetMotDePass]=useState("")
@@ -33,21 +34,25 @@ const Accueil = () => {
     })
   }
   return (
-    <div className='acceuil'>
-      {errors.map((err, index) => <p key={index}>{err}</p>)}
-        <h2>plan tache</h2>
-        <h2>Saisie votre login et mot de passe pour connecter</h2>
-        <h3>LOGIN</h3>
-        <input type="text" onChange={(e)=>{SetLogin(e.target.value)  }}/>
-        <h3>MOT DE PASSE</h3>
-        <input type="text"  onChange={(e)=>{SetMotDePass(e.target.value)}}/> <br/>
-        <div style={{display: 'flex',alignItems: 'center',justifyContent: 'center'}}>
-       <button onClick={()=>{conexion()}} style={{backgroundColor:'red', color:'white',margin:'30px'}}>connexion </button> 
-         <p style={{color:'white'}}>ou</p>
-        <Link to='/Inscription'><button style={{margin:'30px'}} >inscription</button></Link>
+    <div className='accueil-container'>
+      <div className='acceuil'>
+        <h2 className='accueil-header'></h2>
+        {errors.map((err, index) => <p key={index} style={{ color: 'red' }}>{err}</p>)}
+        <h2 style={{color:'whitesmoke'}}>Saisie votre login et mot de passe pour connecter</h2>
+        <div className='accueil-form'>
+          <h3 style={{color:'whitesmoke'}}>LOGIN</h3>
+          <input type="text" onChange={(e) => SetLogin(e.target.value)} />
+          <h3 style={{color:'whitesmoke'}}>MOT DE PASSE</h3>
+          <input type="password" onChange={(e) => SetMotDePass(e.target.value)} /> <br />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={conexion} style={{ backgroundColor: 'red', color: 'white', margin: '30px' }}>connexion</button>
+            <p style={{ color: 'white' }}>ou</p>
+            <Link to='/Inscription'><button style={{ margin: '30px' }}>inscription</button></Link>
+          </div>
         </div>
+      </div>
     </div>
-  )
-}
+  );  
+};
 
-export default Accueil
+export default Accueil;
